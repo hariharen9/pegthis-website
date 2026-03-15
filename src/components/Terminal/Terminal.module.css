@@ -1,0 +1,85 @@
+/* Terminal.module.css */
+
+.sectionLabel {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+.sectionTitle {
+  font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+}
+
+.terminal {
+  background: #090a0b; border: 1px solid var(--border-2); margin-top: 2.5rem;
+  transition: border-color 0.45s, box-shadow 0.3s;
+  position: relative; overflow: hidden;
+}
+:global([data-theme="light"]) .terminal { background: #1a1e22; }
+.terminal:hover { box-shadow: 0 0 0 1px var(--amber-dim), 0 16px 48px var(--shadow); }
+
+.terminalBar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-3);
+  transition: background 0.45s;
+}
+:global([data-theme="light"]) .terminalBar { background: #252b31; }
+.dot { width: 10px; height: 10px; border-radius: 50%; transition: transform 0.2s; }
+.dot:hover { transform: scale(1.3); }
+.dotR { background: #e84040; }
+.dotY { background: var(--amber); }
+.dotG { background: var(--green); }
+.terminalTitle { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); margin: 0 auto; letter-spacing: 0.05em; }
+
+.terminalBody {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border); /* border acts as divider */
+}
+.terminalPane {
+  background: #090a0b; 
+  padding: 1.5rem; font-family: var(--mono); font-size: 0.82rem;
+  line-height: 2.1; color: var(--text-2); min-height: 380px; max-height: 380px;
+  overflow-y: auto; white-space: pre-wrap;
+  position: relative;
+}
+:global([data-theme="light"]) .terminalPane { background: #1a1e22; color: #c8d0d8; }
+
+.cursor {
+  display: inline-block; width: 8px; height: 15px; background: var(--amber);
+  vertical-align: middle; animation: blink 1s step-end infinite;
+}
+
+/* Progress bar */
+.barTrack { display: inline-block; width: 200px; background: var(--border); height: 6px; vertical-align: middle; }
+.barFill { display: block; height: 100%; background: var(--amber); width: 0%; transition: width 0.1s linear; }
+
+/* replay button */
+.replayBtn {
+  position: absolute; bottom: 1rem; right: 1rem;
+  font-family: var(--mono); font-size: 0.65rem;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-3); padding: 0.3rem 0.7rem;
+  cursor: pointer; letter-spacing: 0.08em; transition: all 0.2s;
+  opacity: 0; pointer-events: none;
+}
+.replayVisible { opacity: 1; pointer-events: all; }
+.replayBtn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* CLI strip */
+.cliStrip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border); border-top: none;
+  transition: border-color 0.45s;
+}
+.cliCell { background: var(--bg-2); padding: 1.25rem 1.5rem; transition: background 0.25s; }
+.cliCell:hover { background: var(--surface); }
+.cliHeading { font-family: var(--mono); font-size: 0.7rem; color: var(--amber); letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+.cliCmd { font-family: var(--mono); font-size: 0.82rem; color: var(--green); margin-bottom: 0.2rem; }
+.cliDesc { font-size: 0.78rem; color: var(--text-3); margin-bottom: 0.65rem; }
+.cliCmdCyan { color: var(--cyan); }
+
+@media (max-width: 768px) {
+  .terminalBody { grid-template-columns: 1fr; }
+  .terminalPane:first-child { border-bottom: 1px solid var(--border); }
+}

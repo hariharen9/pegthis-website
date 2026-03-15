@@ -1,0 +1,50 @@
+/* AiSection.module.css */
+.section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+.sectionLabel {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+.sectionTitle {
+  font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+}
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+
+.card {
+  background: var(--bg); border: 1px solid var(--border); padding: 2rem;
+  position: relative; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  opacity: 0; transition: opacity 0.35s;
+}
+.card:hover { border-color: var(--amber-dim); transform: translateY(-4px); box-shadow: 0 12px 40px var(--shadow); }
+.card:hover::before { opacity: 1; }
+
+.badge {
+  position: absolute; top: -1px; right: 1.5rem;
+  font-family: var(--mono); font-size: 0.6rem;
+  background: var(--amber); color: #0c0d0e;
+  padding: 0.2rem 0.6rem; letter-spacing: 0.1em; font-weight: 700;
+}
+
+.cardTitle { font-family: var(--display); font-size: 1.3rem; font-weight: 800; margin-bottom: 0.75rem; }
+.cardDesc { font-size: 0.9rem; color: var(--text-2); font-weight: 300; margin-bottom: 1.5rem; line-height: 1.7; }
+
+.detailRow {
+  display: flex; gap: 1rem; align-items: baseline;
+  padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  transition: background 0.15s; cursor: default;
+}
+.detailRow:last-child { border-bottom: none; }
+.detailRow:hover { background: var(--amber-glow); padding-left: 0.5rem; margin-left: -0.5rem; margin-right: -0.5rem; padding-right: 0.5rem; }
+.detailKey { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); min-width: 100px; flex-shrink: 0; }
+.detailVal { color: var(--text-2); }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }

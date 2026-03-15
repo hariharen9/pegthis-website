@@ -1,0 +1,7 @@
+/* MouseSpotlight.module.css */
+.spotlight {
+  position: fixed; inset: 0; pointer-events: none; z-index: 998;
+  background: radial-gradient(400px circle at var(--mx,50%) var(--my,50%), rgba(245,166,35,0.02), transparent 50%);
+}
+
+:global([data-theme="light"]) .spotlight { display: none; }

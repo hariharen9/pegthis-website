@@ -1,0 +1,142 @@
+/* Hero.module.css */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 2rem 140px;
+  box-sizing: border-box;
+}
+
+/* Background layers */
+.heroBg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+
+.heroGrid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.18;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+.waveform {
+  position: absolute; bottom: 100px; left: 0; right: 0;
+  height: 100px; display: flex; align-items: flex-end;
+  gap: 2px; padding: 0 2rem; overflow: hidden; opacity: 0.15;
+}
+
+/* Waveform bars — inline style from JS via CSS vars */
+.waveformBar {
+  flex: 1; background: var(--amber); border-radius: 1px 1px 0 0;
+  animation: waveAnim var(--dur, 0.8s) ease-in-out var(--delay, 0s) infinite alternate;
+  min-width: 2px;
+}
+@keyframes waveAnim { from { transform: scaleY(0.2); } to { transform: scaleY(1); } }
+
+/* fadeUp must be defined locally — CSS Modules scopes @keyframes */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Timecode */
+.timecode {
+  position: absolute; top: 1.5rem; right: 2rem;
+  font-family: var(--mono); font-size: 0.65rem; color: var(--text-3);
+  letter-spacing: 0.1em;
+}
+
+/* Corners */
+.corner { position: absolute; width: 60px; height: 60px; opacity: 0.6; z-index: 5; pointer-events: none; transition: border-color 0.45s; }
+.cornerTl { top: 5.5rem; left: 2rem; border-top: 3px solid var(--amber); border-left: 3px solid var(--amber); }
+.cornerTr { top: 5.5rem; right: 2rem; border-top: 3px solid var(--amber); border-right: 3px solid var(--amber); }
+.cornerBl { bottom: 9.5rem; left: 2rem; border-bottom: 3px solid var(--amber); border-left: 3px solid var(--amber); }
+.cornerBr { bottom: 9.5rem; right: 2rem; border-bottom: 3px solid var(--amber); border-right: 3px solid var(--amber); }
+
+/* Text content */
+.eyebrow {
+  font-family: var(--mono); font-size: 0.72rem; color: var(--amber);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 0.6s ease 0.2s forwards; position: relative;
+  display: flex; align-items: center; gap: 0.75rem; justify-content: center;
+}
+.eyebrow::before, .eyebrow::after { content: ''; width: 20px; height: 1px; background: var(--amber-dim); }
+
+.title {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(3.5rem, 10vw, 8.5rem); line-height: 0.9;
+  letter-spacing: -0.04em; margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 0.6s ease 0.35s forwards; position: relative;
+  text-align: center;
+}
+.accent { color: var(--amber); }
+.dim { color: var(--text-3); }
+
+.sub {
+  font-size: 1.25rem; color: var(--text-2); max-width: 620px;
+  margin: 0 auto 2.5rem; font-weight: 300; line-height: 1.5; text-align: center;
+  opacity: 0; animation: fadeUp 0.6s ease 0.5s forwards; position: relative;
+}
+
+.actions {
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  justify-content: center; opacity: 0;
+  animation: fadeUp 0.6s ease 0.65s forwards; position: relative;
+  z-index: 15;
+}
+
+/* Install command */
+.installCmd {
+  margin-top: 2rem;
+  display: flex; align-items: center;
+  background: var(--bg-3); border: 1px solid var(--border);
+  padding: 0.6rem 1rem 0.6rem 1.25rem; gap: 1rem;
+  font-family: var(--mono); font-size: 0.88rem;
+  opacity: 0; animation: fadeUp 0.6s ease 0.8s forwards;
+  position: relative; z-index: 15;
+}
+.prompt { color: var(--text-3); margin-right: 0.4rem; }
+
+.copyBtn {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  background: transparent; border: 1px solid var(--border-2); color: var(--text-3);
+  padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.2s;
+}
+.copyBtn:hover { border-color: var(--amber); color: var(--amber); }
+.copyBtn.copied { border-color: var(--green); color: var(--green); }
+
+/* Stats bar */
+.statsBar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  opacity: 0; animation: fadeUp 0.6s ease 1s forwards;
+  transition: border-color 0.45s;
+  z-index: 10;
+}
+.statItem {
+  padding: 1.5rem 1rem; border-right: 1px solid var(--border); text-align: center;
+  transition: background 0.25s; cursor: default;
+}
+.statItem:hover { background: var(--amber-glow); }
+.statItem:last-child { border-right: none; }
+.statValue {
+  font-family: var(--display); font-size: 1.6rem; font-weight: 800; color: var(--amber); display: block;
+  transition: transform 0.2s ease;
+}
+.statItem:hover .statValue { transform: scale(1.08); }
+.statLabel { font-family: var(--mono); font-size: 0.62rem; color: var(--text-3); letter-spacing: 0.12em; text-transform: uppercase; }
+
+@media (max-width: 768px) {
+  .hero { padding: 5rem 1.25rem 6rem; }
+  .timecode, .corner { display: none; }
+  .statsBar { position: static; flex-wrap: wrap; border-top: 1px solid var(--border); }
+  .statItem { flex: 1; min-width: 100px; padding: 0.75rem 1rem; }
+}

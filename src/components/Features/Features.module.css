@@ -1,0 +1,55 @@
+/* Features.module.css */
+.header {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: end; margin-bottom: 3rem;
+}
+.sectionLabel {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+.sectionTitle {
+  font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+}
+.sectionDesc { color: var(--text-2); font-size: 1.05rem; font-weight: 300; max-width: 540px; }
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+}
+.card {
+  background: var(--bg); padding: 2rem; transition: background 0.25s, transform 0.25s;
+  position: relative; overflow: hidden; cursor: default;
+}
+.card::before {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--amber);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.card::after {
+  content: ''; position: absolute; inset: 0; background: var(--amber-glow);
+  opacity: 0; transition: opacity 0.3s;
+}
+.card:hover { background: var(--bg-2); }
+.card:hover::before { transform: scaleX(1); }
+.card:hover::after { opacity: 1; }
+.card:hover .icon { transform: scale(1.2) rotate(-4deg); }
+
+.icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; transition: transform 0.25s ease; }
+.title { font-family: var(--display); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.desc { font-size: 0.88rem; color: var(--text-2); font-weight: 300; line-height: 1.6; margin-bottom: 1rem; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tag {
+  font-family: var(--mono); font-size: 0.62rem; padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border-2); color: var(--text-3); letter-spacing: 0.05em; transition: all 0.2s;
+}
+.tag:hover { border-color: var(--amber-dim); color: var(--amber); }
+.tagAmber { border-color: var(--amber-dim); color: var(--amber); }
+.tagGreen { border-color: rgba(61,214,140,0.4); color: var(--green); }
+.tagCyan  { border-color: rgba(56,189,248,0.3); color: var(--cyan); }
+
+@media (max-width: 900px) { .header { grid-template-columns: 1fr; gap: 2rem; } }

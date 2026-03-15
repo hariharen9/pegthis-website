@@ -1,0 +1,43 @@
+/* DownloadSpotlight.module.css */
+.section { background: var(--bg); border-bottom: 1px solid var(--border); }
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 4rem; align-items: center;
+}
+
+.sectionLabel {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+.sectionTitle {
+  font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+}
+.sectionDesc { color: var(--text-2); font-size: 1.05rem; font-weight: 300; max-width: 540px; margin-bottom: 1.5rem; }
+
+.featureList { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.featureItem { display: flex; align-items: center; gap: 0.75rem; }
+.check { color: var(--green); }
+.featureText { color: var(--text-2); font-size: 0.95rem; }
+
+.codePanel {
+  background: var(--bg-3); border: 1px solid var(--border);
+  padding: 1.5rem; position: relative;
+  transition: var(--transition-theme), box-shadow 0.3s;
+}
+.codePanelLabel {
+  position: absolute; top: -10px; left: 1rem;
+  font-family: var(--mono); font-size: 0.6rem; color: var(--cyan);
+  background: var(--bg-3); padding: 0 0.4rem; letter-spacing: 0.08em;
+  transition: background 0.45s;
+}
+.codeBlock { font-family: var(--mono); font-size: 0.78rem; line-height: 2; color: var(--text-2); overflow-x: auto; }
+.cCmd { color: var(--green); }
+.cCmt { color: var(--text-3); font-style: italic; }
+.cArrow { color: var(--amber); }
+.cKey { color: var(--amber); font-weight: 700; }
+.cVal { color: var(--green); }
+.cOpt { color: var(--cyan); }
