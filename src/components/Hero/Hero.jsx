@@ -103,24 +103,24 @@ export default function Hero() {
 
       <div className={styles.statsBar}>
         <div className={styles.statItem}>
-          <span className={styles.statValue}>17</span>
-          <span className={styles.statLabel}>GitHub Stars</span>
+          <span className={styles.statValue}>80+</span>
+          <span className={styles.statLabel}>Media Tools</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statValue}>100+</span>
-          <span className={styles.statLabel}>Operations</span>
+          <span className={styles.statValue}>100%</span>
+          <span className={styles.statLabel}>Local AI</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statValue}>99+</span>
-          <span className={styles.statLabel}>Languages</span>
+          <span className={styles.statValue}>$0</span>
+          <span className={styles.statLabel}>Free Forever</span>
         </div>
         <div className={styles.statItem}>
           <span className={styles.statValue}>1000+</span>
-          <span className={styles.statLabel}>Download Sites</span>
+          <span className={styles.statLabel}>Sites Downloadable</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statValue}>3</span>
-          <span className={styles.statLabel}>Platforms</span>
+          <span className={styles.statValue}>∞</span>
+          <span className={styles.statLabel}>Time Saved</span>
         </div>
       </div>
     </section>

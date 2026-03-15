@@ -73,8 +73,8 @@ export default function App() {
       <Hero />
       <WhySection />
       <Features />
-      <AiSection />
       <DownloadSpotlight />
+      <AiSection />
       <Terminal />
       <OpsSection />
       <Formats />

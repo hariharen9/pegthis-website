@@ -9,33 +9,39 @@
 .sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
 .sectionTitle {
   font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem;
+}
+.titleAccent { color: var(--cyan); }
+.sectionSub {
+  font-size: 1.05rem; color: var(--text-2); font-weight: 300; max-width: 600px;
+  margin-bottom: 0.5rem;
 }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+/* ── Hero grid (2 large cards) ─────────────── */
+.heroGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
 
-.card {
+.heroCard {
   background: var(--bg); border: 1px solid var(--border); padding: 2rem;
   position: relative; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
   overflow: hidden;
 }
-.card::before {
+.heroCard::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
   opacity: 0; transition: opacity 0.35s;
 }
-.card:hover { border-color: var(--amber-dim); transform: translateY(-4px); box-shadow: 0 12px 40px var(--shadow); }
-.card:hover::before { opacity: 1; }
+.heroCard:hover { border-color: var(--cyan); transform: translateY(-4px); box-shadow: 0 12px 40px var(--shadow); }
+.heroCard:hover::before { opacity: 1; }
 
 .badge {
   position: absolute; top: -1px; right: 1.5rem;
   font-family: var(--mono); font-size: 0.6rem;
-  background: var(--amber); color: #0c0d0e;
+  background: var(--cyan); color: #0c0d0e;
   padding: 0.2rem 0.6rem; letter-spacing: 0.1em; font-weight: 700;
 }
 
 .cardTitle { font-family: var(--display); font-size: 1.3rem; font-weight: 800; margin-bottom: 0.75rem; }
-.cardDesc { font-size: 0.9rem; color: var(--text-2); font-weight: 300; margin-bottom: 1.5rem; line-height: 1.7; }
+.cardDesc { font-size: 0.88rem; color: var(--text-2); font-weight: 300; margin-bottom: 1.5rem; line-height: 1.7; }
 
 .detailRow {
   display: flex; gap: 1rem; align-items: baseline;
@@ -43,8 +49,74 @@
   transition: background 0.15s; cursor: default;
 }
 .detailRow:last-child { border-bottom: none; }
-.detailRow:hover { background: var(--amber-glow); padding-left: 0.5rem; margin-left: -0.5rem; margin-right: -0.5rem; padding-right: 0.5rem; }
+.detailRow:hover { background: rgba(56,189,248,0.06); padding-left: 0.5rem; margin-left: -0.5rem; margin-right: -0.5rem; padding-right: 0.5rem; }
 .detailKey { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); min-width: 100px; flex-shrink: 0; }
 .detailVal { color: var(--text-2); }
 
-@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+/* ── Mini grid (5 smaller cards) ───────────── */
+.miniGrid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+  margin-top: 1.5rem;
+}
+
+.miniCard {
+  background: var(--bg); padding: 1.5rem; position: relative;
+  transition: background 0.25s, transform 0.15s; cursor: default; overflow: hidden;
+}
+.miniCard::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--cyan); transform: scaleX(0); transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.miniCard:hover { background: var(--bg-2); }
+.miniCard:hover::after { transform: scaleX(1); }
+.miniCard:hover .miniIcon { transform: translateY(-2px); filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3)); }
+
+.miniIcon {
+  font-size: 1.5rem; display: block; margin-bottom: 0.75rem;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+}
+.miniTitle { font-family: var(--display); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+.miniDesc { font-size: 0.78rem; color: var(--text-2); font-weight: 300; line-height: 1.5; }
+
+.aiBadgeSmall {
+  position: absolute; top: 0.75rem; right: 0.75rem;
+  font-family: var(--mono); font-size: 0.5rem;
+  color: var(--cyan); border: 1px solid rgba(56,189,248,0.3);
+  padding: 0.1rem 0.35rem; letter-spacing: 0.1em; font-weight: 700;
+}
+
+/* ── Stat strip ────────────────────────────── */
+.statStrip {
+  display: flex; gap: 1px; margin-top: 1.5rem;
+  background: var(--border); border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  overflow: hidden;
+}
+.statCell {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  padding: 1rem; background: var(--bg); text-align: center;
+  transition: background 0.25s;
+}
+.statCell:hover { background: var(--bg-2); }
+.statValue {
+  font-family: var(--display); font-size: 1.5rem; font-weight: 800;
+  color: var(--cyan); line-height: 1.2;
+}
+.statLabel {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--text-3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 900px) {
+  .heroGrid { grid-template-columns: 1fr; }
+  .miniGrid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .miniGrid { grid-template-columns: repeat(2, 1fr); }
+  .statStrip { flex-wrap: wrap; }
+  .statCell { flex: 1 1 45%; }
+}

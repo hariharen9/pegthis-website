@@ -77,13 +77,13 @@ const SEQ_RIGHT = [
 // ── Inline terminal styles ──────────────────────────────────────────────
 const TERMINAL_STYLE = `
   .t-prompt { color: var(--amber); }
-  .t-cmd { color: var(--green); }
-  .t-hdr { color: var(--amber); font-weight: 700; }
+  .t-cmd { color: var(--text); font-weight: 500; }
+  .t-hdr { color: var(--amber); font-weight: 800; }
   .t-dim { color: var(--text-3); }
-  .t-active { color: var(--amber); }
-  .t-menu { color: var(--text); padding-left: 1rem; }
-  .t-sel { color: var(--cyan); }
-  .t-success { color: var(--green); }
+  .t-active { color: var(--amber); text-shadow: 0 0 8px rgba(255,184,108,0.4); }
+  .t-menu { color: var(--text-2); padding-left: 1rem; }
+  .t-sel { color: var(--cyan); font-weight: 700; }
+  .t-success { color: var(--cyan); }
 `
 
 // ── Terminal Instance (Single Pane API) ─────────────────────────────────
@@ -122,21 +122,21 @@ function TerminalInstance({ sequence, started, replayKey, onDone }) {
     if (!body) return
     const cur = body.querySelector(`.${styles.cursor}`)
     if (cur) cur.remove()
-    
+
     const line = document.createElement('span')
     line.style.cssText = 'display:block; opacity:1;'
     line.innerHTML = prefix
-    
+
     const textSpan = document.createElement('span')
     if (textClass) textSpan.className = textClass
     line.appendChild(textSpan)
-    
+
     const cursor = document.createElement('span')
     cursor.className = styles.cursor
     line.appendChild(cursor)
-    
+
     body.appendChild(line)
-    
+
     let i = 0
     const tick = () => {
       if (!bodyRef.current) return
@@ -300,19 +300,19 @@ export default function Terminal() {
             <div className={`${styles.dot} ${styles.dotG}`} />
             <div className={styles.terminalTitle}>peg_this — split pane</div>
           </div>
-          
+
           <div className={styles.terminalBody}>
-            <TerminalInstance 
-              sequence={SEQ_LEFT} 
-              started={started} 
-              replayKey={replayKey} 
-              onDone={() => setDoneCount(c => c + 1)} 
+            <TerminalInstance
+              sequence={SEQ_LEFT}
+              started={started}
+              replayKey={replayKey}
+              onDone={() => setDoneCount(c => c + 1)}
             />
-            <TerminalInstance 
-              sequence={SEQ_RIGHT} 
-              started={started} 
-              replayKey={replayKey} 
-              onDone={() => setDoneCount(c => c + 1)} 
+            <TerminalInstance
+              sequence={SEQ_RIGHT}
+              started={started}
+              replayKey={replayKey}
+              onDone={() => setDoneCount(c => c + 1)}
             />
           </div>
 

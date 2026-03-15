@@ -12,12 +12,12 @@
 }
 
 .terminal {
-  background: #090a0b; border: 1px solid var(--border-2); margin-top: 2.5rem;
+  background: rgba(9, 10, 11, 0.85); border: 1px solid var(--border-2); margin-top: 2.5rem;
   transition: border-color 0.45s, box-shadow 0.3s;
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
-:global([data-theme="light"]) .terminal { background: #1a1e22; }
-.terminal:hover { box-shadow: 0 0 0 1px var(--amber-dim), 0 16px 48px var(--shadow); }
+:global([data-theme="light"]) .terminal { background: rgba(26, 30, 34, 0.85); }
+.terminal:hover { box-shadow: 0 0 0 1px rgba(255, 184, 108, 0.4), 0 16px 48px var(--shadow); }
 
 .terminalBar {
   display: flex; align-items: center; gap: 0.5rem;
@@ -29,7 +29,7 @@
 .dot:hover { transform: scale(1.3); }
 .dotR { background: #e84040; }
 .dotY { background: var(--amber); }
-.dotG { background: var(--green); }
+.dotG { background: var(--cyan); }
 .terminalTitle { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); margin: 0 auto; letter-spacing: 0.05em; }
 
 .terminalBody {
@@ -37,13 +37,13 @@
   gap: 1px; background: var(--border); /* border acts as divider */
 }
 .terminalPane {
-  background: #090a0b; 
+  background: transparent; 
   padding: 1.5rem; font-family: var(--mono); font-size: 0.82rem;
   line-height: 2.1; color: var(--text-2); min-height: 380px; max-height: 380px;
   overflow-y: auto; white-space: pre-wrap;
   position: relative;
 }
-:global([data-theme="light"]) .terminalPane { background: #1a1e22; color: #c8d0d8; }
+:global([data-theme="light"]) .terminalPane { color: #c8d0d8; }
 
 .cursor {
   display: inline-block; width: 8px; height: 15px; background: var(--amber);
@@ -75,7 +75,7 @@
 .cliCell { background: var(--bg-2); padding: 1.25rem 1.5rem; transition: background 0.25s; }
 .cliCell:hover { background: var(--surface); }
 .cliHeading { font-family: var(--mono); font-size: 0.7rem; color: var(--amber); letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-.cliCmd { font-family: var(--mono); font-size: 0.82rem; color: var(--green); margin-bottom: 0.2rem; }
+.cliCmd { font-family: var(--mono); font-size: 0.82rem; color: var(--cyan); margin-bottom: 0.2rem; }
 .cliDesc { font-size: 0.78rem; color: var(--text-3); margin-bottom: 0.65rem; }
 .cliCmdCyan { color: var(--cyan); }
 

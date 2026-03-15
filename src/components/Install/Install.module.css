@@ -1,5 +1,5 @@
 /* Install.module.css */
-.section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8rem 0; }
 
 .sectionLabel {
   font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
@@ -7,49 +7,157 @@
   display: flex; align-items: center; gap: 0.75rem;
 }
 .sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+
 .sectionTitle {
   font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 3rem;
 }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
-
-.card {
-  background: var(--bg); border: 1px solid var(--border); padding: 1.5rem;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-}
-.card:hover { border-color: var(--amber-dim); transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
-
-.cardTitle {
-  font-family: var(--mono); font-size: 0.8rem; color: var(--text-2);
-  margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; letter-spacing: 0.08em;
-}
-.cardSubtitle {
-  font-family: var(--mono); font-size: 0.72rem; color: var(--text-3);
-  margin-bottom: 0.25rem; margin-top: 0.75rem;
+/* ── Layout ─────────────────────────────── */
+.showcase {
+  display: flex; gap: 2rem;
+  align-items: stretch; margin-bottom: 3rem;
 }
 
-.codeBlock {
-  background: #090a0b; border: 1px solid var(--border);
-  padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.82rem;
-  color: var(--green); margin-bottom: 0.5rem;
-  display: flex; align-items: flex-start; gap: 0.75rem;
-  line-height: 2; transition: border-color 0.2s;
+/* ── Main Terminal Block ───────────────────────── */
+.terminalContainer {
+  flex: 2;
+  background: rgba(9, 10, 11, 0.85); border: 1px solid var(--border-2);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; flex-direction: column;
+  box-shadow: 0 16px 48px var(--shadow); transition: border-color 0.4s;
 }
-:global([data-theme="light"]) .codeBlock { background: #1a1e22; }
-.codeBlock:hover { border-color: var(--border-2); }
-.prefix { color: var(--text-3); flex-shrink: 0; }
-.multiLine { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
-.multiLine div { display: flex; gap: 0.5rem; }
+:global([data-theme="light"]) .terminalContainer { background: rgba(255, 255, 255, 0.85); border-color: var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+.terminalContainer:hover { border-color: rgba(255, 184, 108, 0.3); }
 
-.note { font-size: 0.78rem; color: var(--text-3); margin-top: 0.75rem; }
-
-.extrasLabel { font-family: var(--mono); font-size: 0.65rem; color: var(--text-3); letter-spacing: 0.1em; margin-bottom: 0.5rem; margin-top: 1.25rem; }
-.extras { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
-.extra {
-  font-family: var(--mono); font-size: 0.7rem; padding: 0.3rem 0.75rem;
-  background: var(--bg-3); border: 1px solid var(--border-2); color: var(--amber-dim);
-  transition: all 0.2s; cursor: default;
+.terminalBar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-3);
 }
-.extra:hover { border-color: var(--amber); color: var(--amber); transform: scale(1.03); }
-.extra strong { color: var(--amber); }
+:global([data-theme="light"]) .terminalBar { background: var(--bg-2); border-bottom-color: var(--border); }
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dotR { background: #e84040; }
+.dotY { background: var(--amber); }
+.dotG { background: var(--cyan); }
+.terminalTitle { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); margin: 0 auto; letter-spacing: 0.05em; }
+
+.terminalBody { display: flex; flex-direction: column; flex: 1; }
+
+/* ── Methods & Commands ─────────────────────── */
+.methodSelector {
+  display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
+}
+:global([data-theme="light"]) .methodSelector { background: var(--surface); }
+.methodBtn {
+  flex: 1; background: transparent; border: none; padding: 1rem 0;
+  font-family: var(--mono); font-size: 0.75rem; color: var(--text-3); cursor: pointer;
+  transition: all 0.2s; border-bottom: 2px solid transparent; letter-spacing: 0.05em;
+}
+.methodBtn:hover { background: rgba(255,184,108,0.05); color: var(--text-2); }
+:global([data-theme="light"]) .methodBtn:hover { background: rgba(0,0,0,0.04); }
+.activeBtn { color: var(--amber); border-bottom-color: var(--amber); background: rgba(255,184,108,0.1); }
+:global([data-theme="light"]) .activeBtn { background: rgba(255, 184, 108, 0.15); color: #d97706; border-bottom-color: #d97706; }
+
+.cmdArea {
+  padding: 2.5rem; flex: 1; display: flex; flex-direction: column; justify-content: center;
+}
+.cmdInfo { font-size: 0.95rem; color: var(--text-2); margin-bottom: 1.5rem; font-weight: 300; }
+
+.cmdLine {
+  display: flex; align-items: center; background: #000; border: 1px solid var(--border);
+  border-radius: 4px; padding: 1.25rem 1.5rem; justify-content: space-between; gap: 1rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+:global([data-theme="light"]) .cmdLine { background: var(--bg); border-color: var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+.prompt { color: var(--amber); font-family: var(--mono); opacity: 0.8; }
+:global([data-theme="light"]) .prompt { color: var(--cyan); }
+.commandText {
+  font-family: var(--mono); font-size: 0.95rem; color: var(--cyan); flex: 1;
+  white-space: nowrap; overflow-x: auto;
+}
+:global([data-theme="light"]) .commandText { color: var(--text); font-weight: 500; }
+
+/* ── Copy Button ─────────────────────── */
+.copyBtn {
+  background: var(--surface); border: 1px solid var(--border-2); color: var(--text-2);
+  font-family: var(--mono); font-size: 0.65rem; padding: 0.4rem 0.8rem; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.2s; border-radius: 2px; flex-shrink: 0;
+}
+.copyBtn:hover { border-color: var(--amber); color: var(--amber); }
+.copied { border-color: var(--green); color: var(--green); }
+
+/* ── OS Reqs ─────────────────────────── */
+.osReqs {
+  padding: 1rem 2.5rem; border-top: 1px dashed var(--border);
+  display: flex; gap: 1.5rem; align-items: center; background: rgba(0,0,0,0.1);
+  font-family: var(--mono); font-size: 0.7rem; color: var(--text-3);
+}
+:global([data-theme="light"]) .osReqs { background: var(--bg-2); }
+.reqLabel { color: var(--amber-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.reqPlatform { display: flex; gap: 0.5rem; align-items: center; opacity: 0.8; }
+.reqPlatform code { color: #fff; background: #000; padding: 0.2rem 0.4rem; border: 1px solid var(--border); border-radius: 2px; }
+:global([data-theme="light"]) .reqPlatform code { color: var(--text); background: #e0e0e0; border-color: #d0d0d0; }
+
+/* ── Sidebar: Optional Plugins ─────────────────── */
+.pluginsContainer {
+  flex: 1; background: var(--surface); border: 1px solid var(--border); padding: 2.5rem 2rem;
+  display: flex; flex-direction: column;
+}
+.pluginsTitle { font-family: var(--display); font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+.pluginsDesc { font-size: 0.9rem; color: var(--text-2); font-weight: 300; margin-bottom: 2rem; line-height: 1.5; }
+
+.pluginsGrid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; flex: 1; }
+.pluginItem {
+  display: flex; flex-direction: column; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+}
+.pluginItem:last-child { border-bottom: none; }
+.pluginName { font-family: var(--mono); font-size: 0.85rem; color: var(--amber); margin-bottom: 0.25rem; font-weight: 600; }
+.pluginDesc { font-size: 0.8rem; color: var(--text-3); font-weight: 300; }
+
+.pluginExample {
+  margin-top: auto; padding: 1rem; background: var(--bg); border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 0.5rem; border-radius: 2px;
+}
+.exLabel { font-family: var(--mono); font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; }
+.pluginExample code { font-family: var(--mono); font-size: 0.8rem; color: var(--cyan); }
+
+
+/* ── Floating Binary Note ───────────────── */
+.binaryNote {
+  background: var(--amber-glow); border: 1px solid var(--amber-dim);
+  padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+  margin-top: 1rem; box-shadow: 0 8px 32px rgba(255, 184, 108, 0.05);
+}
+.binaryNoteText { display: flex; align-items: flex-start; gap: 1.5rem; }
+.bnBadge {
+  background: var(--amber); color: #000; font-family: var(--mono); font-size: 0.65rem;
+  padding: 0.2rem 0.6rem; font-weight: 800; letter-spacing: 0.1em; margin-top: 0.25rem;
+}
+.binaryNoteText strong { font-family: var(--display); font-size: 1.25rem; color: var(--amber); display: block; margin-bottom: 0.25rem; }
+.binaryNoteText span { font-size: 0.95rem; color: var(--text-2); font-weight: 300; }
+
+.binaryBtn {
+  background: var(--bg); color: var(--amber); border: 1px solid var(--amber);
+  padding: 0.75rem 1.5rem; font-family: var(--mono); font-size: 0.8rem;
+  text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em;
+  transition: all 0.2s; white-space: nowrap; font-weight: 600;
+}
+.binaryBtn:hover { background: var(--amber); color: #000; }
+
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 1024px) {
+  .showcase { flex-direction: column; }
+  .terminalContainer { flex: none; }
+  .pluginsContainer { border-top: none; }
+  .methodSelector { font-size: 0.65rem; flex-wrap: wrap; }
+  .methodBtn { flex-basis: 50%; border-bottom: 1px solid var(--border); }
+  .osReqs { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+  .cmdLine { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem; }
+  .commandText { white-space: pre-wrap; word-break: break-all; }
+  .binaryNote { flex-direction: column; text-align: left; padding: 1.5rem; }
+  .binaryNoteText { flex-direction: column; gap: 1rem; }
+}

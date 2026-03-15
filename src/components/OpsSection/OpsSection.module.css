@@ -1,6 +1,9 @@
 /* OpsSection.module.css */
 .section { background: var(--bg-2); border-top: 1px solid var(--border); }
 
+.headerRow {
+  display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;
+}
 .sectionLabel {
   font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
   letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
@@ -9,46 +12,89 @@
 .sectionLabel::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
 .sectionTitle {
   font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em;
 }
 
-.tabs { display: flex; gap: 0; margin-top: 3rem; border-bottom: 1px solid var(--border); }
+/* ── Total badge ───────────────────────────── */
+.totalBadge {
+  display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-3); border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.totalNumber {
+  font-family: var(--display); font-size: 2.2rem; font-weight: 800;
+  color: var(--amber); line-height: 1;
+}
+.totalLabel {
+  font-family: var(--mono); font-size: 0.55rem; color: var(--text-3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* ── Tabs ───────────────────────────────────── */
+.tabs { display: flex; gap: 0; margin-top: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .tab {
-  font-family: var(--mono); font-size: 0.72rem; padding: 0.75rem 1.5rem;
+  font-family: var(--mono); font-size: 0.7rem; padding: 0.7rem 1.2rem;
   border: 1px solid transparent; border-bottom: none; cursor: pointer;
-  background: transparent; color: var(--text-3); letter-spacing: 0.1em;
+  background: transparent; color: var(--text-3); letter-spacing: 0.08em;
   text-transform: uppercase; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0.5rem;
 }
 .tab.active { background: var(--surface); border-color: var(--border); color: var(--amber); }
 .tab:hover:not(.active) { color: var(--text-2); background: var(--bg-3); }
+.tabCount {
+  font-size: 0.55rem; background: var(--bg-3); padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border); color: var(--text-3);
+  min-width: 1.2rem; text-align: center;
+}
+.tab.active .tabCount { background: var(--amber); color: #0c0d0e; border-color: var(--amber); }
 
+/* ── Panel ──────────────────────────────────── */
 .panel {
   display: none; background: var(--bg-2); border: 1px solid var(--border); border-top: none;
   animation: panelIn 0.25s ease;
 }
 .panel.active { display: block; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
+/* ── Sub-headings ──────────────────────────── */
+.subHeading {
+  font-family: var(--mono); font-size: 0.7rem; color: var(--amber);
+  letter-spacing: 0.1em; padding: 0.75rem 1.5rem;
+  background: var(--bg-3); border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+
+/* ── Table ──────────────────────────────────── */
 .table { width: 100%; border-collapse: collapse; }
 .table th {
-  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--text-3);
-  padding: 0.75rem 1.5rem; text-align: left;
+  padding: 0.6rem 1.5rem; text-align: left;
   border-bottom: 1px solid var(--border); background: var(--bg-3);
   position: sticky; top: 0; z-index: 1;
 }
 .table td {
-  padding: 0.75rem 1.5rem; font-size: 0.85rem;
+  padding: 0.6rem 1.5rem; font-size: 0.82rem;
   border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top;
   transition: background 0.15s;
 }
 .table tr:last-child td { border-bottom: none; }
 .table tr:hover td { background: var(--amber-glow); }
-.table td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--cyan); white-space: nowrap; }
+.table td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--text); white-space: nowrap; font-weight: 600; }
 
 .lossless {
-  font-family: var(--mono); font-size: 0.65rem; color: var(--green);
+  font-family: var(--mono); font-size: 0.62rem; color: var(--green);
   background: rgba(61,214,140,0.1); padding: 0.15rem 0.4rem;
-  border: 1px solid rgba(61,214,140,0.2);
+  border: 1px solid rgba(61,214,140,0.2); white-space: nowrap;
 }
 
-@media (max-width: 768px) { .tabs { flex-wrap: wrap; } .tab { font-size: 0.65rem; padding: 0.6rem 0.9rem; } .table th, .table td { padding: 0.6rem 0.75rem; font-size: 0.8rem; } }
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 900px) {
+  .headerRow { flex-direction: column; align-items: flex-start; gap: 1rem; }
+}
+@media (max-width: 768px) {
+  .tab { font-size: 0.6rem; padding: 0.55rem 0.7rem; }
+  .table th, .table td { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+  .table td:first-child { white-space: normal; }
+}
