@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>peg_this — FFmpeg, but you'll actually use it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #0c0d0e;
+    --bg-2:      #111315;
+    --bg-3:      #161a1d;
+    --surface:   #1a1e22;
+    --border:    #252b31;
+    --border-2:  #2e363e;
+    --amber:     #f5a623;
+    --amber-dim: #b87b1a;
+    --amber-glow:#f5a62322;
+    --red:       #e84040;
+    --green:     #3dd68c;
+    --cyan:      #38bdf8;
+    --text:      #e8e6e1;
+    --text-2:    #9ea8b3;
+    --text-3:    #5a6470;
+    --mono:      'Space Mono', monospace;
+    --display:   'Syne', sans-serif;
+    --body:      'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem; height: 60px;
+    background: rgba(12,13,14,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono); font-size: 0.9rem; color: var(--amber);
+    letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .blink {
+    display: inline-block; width: 8px; height: 8px;
+    background: var(--amber); border-radius: 50%;
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+  .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--text-2);
+    text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--amber); }
+
+  .nav-cta {
+    font-family: var(--mono); font-size: 0.75rem;
+    background: var(--amber); color: #0c0d0e; border: none;
+    padding: 0.45rem 1.1rem; cursor: pointer; text-decoration: none;
+    letter-spacing: 0.05em; font-weight: 700;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: #ffc147; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 6rem 2rem 8rem;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px; opacity: 0.25;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .waveform {
+    position: absolute; bottom: 80px; left: 0; right: 0;
+    height: 200px; display: flex; align-items: flex-end;
+    justify-content: center; gap: 2px; opacity: 0.1; padding: 0 2rem;
+  }
+
+  .waveform-bar {
+    flex: 1; max-width: 4px; background: var(--amber);
+    border-radius: 2px 2px 0 0; transform-origin: bottom;
+    animation: wave var(--dur) ease-in-out infinite alternate;
+    animation-delay: var(--delay);
+  }
+
+  @keyframes wave { from { transform: scaleY(0.1); } to { transform: scaleY(1); } }
+
+  .timecode {
+    position: absolute; top: 80px; right: 2.5rem;
+    font-family: var(--mono); font-size: 0.7rem;
+    color: var(--text-3); letter-spacing: 0.1em;
+  }
+  .timecode span { color: var(--amber); }
+
+  .corner { position: absolute; width: 40px; height: 40px; opacity: 0.4; }
+  .corner-tl { top: 80px; left: 2.5rem; border-top: 2px solid var(--amber); border-left: 2px solid var(--amber); }
+  .corner-tr { top: 80px; right: 2.5rem; border-top: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+  .corner-bl { bottom: 80px; left: 2.5rem; border-bottom: 2px solid var(--amber); border-left: 2px solid var(--amber); }
+  .corner-br { bottom: 80px; right: 2.5rem; border-bottom: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--amber);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.6s ease 0.2s forwards; position: relative;
+  }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .hero-title {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(3.5rem, 9vw, 8rem); line-height: 0.95;
+    letter-spacing: -0.03em; margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.6s ease 0.35s forwards; position: relative;
+  }
+  .hero-title .accent { color: var(--amber); }
+  .hero-title .dim { color: var(--text-3); }
+
+  .hero-sub {
+    font-size: 1.15rem; color: var(--text-2); max-width: 560px;
+    margin: 0 auto 2.5rem; font-weight: 300;
+    opacity: 0; animation: fadeUp 0.6s ease 0.5s forwards; position: relative;
+  }
+
+  .hero-actions {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    justify-content: center; opacity: 0;
+    animation: fadeUp 0.6s ease 0.65s forwards; position: relative;
+  }
+
+  .btn-primary {
+    font-family: var(--mono); font-size: 0.85rem;
+    background: var(--amber); color: #0c0d0e; border: none;
+    padding: 0.85rem 2rem; cursor: pointer; text-decoration: none;
+    font-weight: 700; letter-spacing: 0.05em;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-primary:hover { background: #ffc147; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,166,35,0.3); }
+
+  .btn-secondary {
+    font-family: var(--mono); font-size: 0.85rem;
+    background: transparent; color: var(--text-2); border: 1px solid var(--border-2);
+    padding: 0.85rem 2rem; cursor: pointer; text-decoration: none;
+    letter-spacing: 0.05em; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
+
+  .install-cmd {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--bg-3); border: 1px solid var(--border);
+    padding: 1rem 1.5rem; margin-top: 2.5rem;
+    opacity: 0; animation: fadeUp 0.6s ease 0.8s forwards;
+    position: relative;
+  }
+  .install-cmd::before {
+    content: 'INSTALL'; position: absolute; top: -10px; left: 1rem;
+    font-family: var(--mono); font-size: 0.6rem; color: var(--text-3);
+    background: var(--bg-3); padding: 0 0.4rem; letter-spacing: 0.1em;
+  }
+  .install-cmd code { font-family: var(--mono); font-size: 0.9rem; color: var(--green); }
+  .install-cmd code .prompt { color: var(--text-3); }
+
+  .copy-btn {
+    font-family: var(--mono); font-size: 0.65rem;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-3); padding: 0.3rem 0.6rem;
+    cursor: pointer; letter-spacing: 0.08em; transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  .stats-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: center;
+    border-top: 1px solid var(--border);
+    opacity: 0; animation: fadeUp 0.6s ease 1s forwards;
+  }
+  .stat-item {
+    padding: 1rem 2.5rem; border-right: 1px solid var(--border); text-align: center;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-value { font-family: var(--display); font-size: 1.6rem; font-weight: 800; color: var(--amber); display: block; }
+  .stat-label { font-family: var(--mono); font-size: 0.62rem; color: var(--text-3); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  .section-label {
+    font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
+    letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .section-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--amber); }
+
+  .section-title {
+    font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+  }
+  .section-desc { color: var(--text-2); font-size: 1.05rem; font-weight: 300; max-width: 540px; }
+
+  /* WHY */
+  .why-section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-top: 3rem; }
+
+  .code-panel {
+    background: var(--bg-3); border: 1px solid var(--border); padding: 1.5rem; position: relative;
+  }
+  .code-panel-label {
+    position: absolute; top: -10px; left: 1rem;
+    font-family: var(--mono); font-size: 0.6rem;
+    background: var(--bg-3); padding: 0 0.4rem; letter-spacing: 0.08em;
+  }
+  .code-panel-label.bad { color: var(--red); }
+  .code-panel-label.good { color: var(--green); }
+
+  .code-block { font-family: var(--mono); font-size: 0.78rem; line-height: 1.8; color: var(--text-2); overflow-x: auto; }
+  .c-cmd { color: var(--cyan); }
+  .c-flag { color: var(--amber); }
+  .c-str { color: var(--green); }
+  .c-cmt { color: var(--text-3); font-style: italic; }
+  .c-err { color: var(--red); }
+
+  .why-features { display: flex; flex-direction: column; gap: 1rem; }
+  .why-feature {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem; background: var(--bg-3); border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .why-feature:hover { border-color: var(--amber-dim); }
+  .why-feature-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .why-feature-title { font-family: var(--display); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .why-feature-desc { font-size: 0.85rem; color: var(--text-2); font-weight: 300; }
+
+  /* FEATURES GRID */
+  .features-header { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: end; margin-bottom: 3rem; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+
+  .feature-card {
+    background: var(--bg); padding: 2rem; transition: background 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::after {
+    content: ''; position: absolute; inset: 0; background: var(--amber-glow);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: var(--bg-2); }
+  .feature-card:hover::after { opacity: 1; }
+  .feature-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
+  .feature-title { font-family: var(--display); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .feature-desc { font-size: 0.88rem; color: var(--text-2); font-weight: 300; line-height: 1.6; margin-bottom: 1rem; }
+
+  .feature-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag { font-family: var(--mono); font-size: 0.62rem; padding: 0.2rem 0.5rem; border: 1px solid var(--border-2); color: var(--text-3); letter-spacing: 0.05em; }
+  .tag-amber { border-color: var(--amber-dim); color: var(--amber); }
+  .tag-green { border-color: #1d5c3f; color: var(--green); }
+  .tag-cyan  { border-color: #0e4a63; color: var(--cyan); }
+
+  /* AI SECTION */
+  .ai-section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+
+  .ai-card {
+    background: var(--bg); border: 1px solid var(--border); padding: 2rem;
+    position: relative; transition: border-color 0.2s, transform 0.2s;
+  }
+  .ai-card:hover { border-color: var(--amber-dim); transform: translateY(-3px); }
+
+  .ai-card-badge {
+    position: absolute; top: -1px; right: 1.5rem;
+    font-family: var(--mono); font-size: 0.6rem;
+    background: var(--amber); color: #0c0d0e;
+    padding: 0.2rem 0.6rem; letter-spacing: 0.1em; font-weight: 700;
+  }
+
+  .ai-card-title { font-family: var(--display); font-size: 1.3rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .ai-card-desc { font-size: 0.9rem; color: var(--text-2); font-weight: 300; margin-bottom: 1.5rem; line-height: 1.7; }
+
+  .ai-detail-row {
+    display: flex; gap: 1rem; align-items: baseline;
+    padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  }
+  .ai-detail-row:last-child { border-bottom: none; }
+  .ai-detail-key { font-family: var(--mono); font-size: 0.72rem; color: var(--text-3); min-width: 100px; flex-shrink: 0; }
+  .ai-detail-val { color: var(--text-2); }
+
+  /* OPS TABS */
+  .ops-section { background: var(--bg-2); border-top: 1px solid var(--border); }
+
+  .ops-tabs { display: flex; gap: 0; margin-top: 3rem; border-bottom: 1px solid var(--border); }
+  .ops-tab {
+    font-family: var(--mono); font-size: 0.72rem; padding: 0.75rem 1.5rem;
+    border: 1px solid transparent; border-bottom: none; cursor: pointer;
+    background: transparent; color: var(--text-3); letter-spacing: 0.1em;
+    text-transform: uppercase; transition: all 0.2s;
+  }
+  .ops-tab.active { background: var(--surface); border-color: var(--border); color: var(--amber); }
+  .ops-tab:hover:not(.active) { color: var(--text-2); }
+
+  .ops-panel { display: none; background: var(--bg-2); border: 1px solid var(--border); border-top: none; }
+  .ops-panel.active { display: block; }
+
+  .ops-table { width: 100%; border-collapse: collapse; }
+  .ops-table th {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-3);
+    padding: 0.75rem 1.5rem; text-align: left;
+    border-bottom: 1px solid var(--border); background: var(--bg-3);
+  }
+  .ops-table td {
+    padding: 0.75rem 1.5rem; font-size: 0.85rem;
+    border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top;
+  }
+  .ops-table tr:last-child td { border-bottom: none; }
+  .ops-table tr:hover td { background: rgba(245,166,35,0.04); }
+  .ops-table td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--cyan); white-space: nowrap; }
+
+  .lossless {
+    font-family: var(--mono); font-size: 0.65rem; color: var(--green);
+    background: rgba(61,214,140,0.1); padding: 0.15rem 0.4rem;
+    border: 1px solid rgba(61,214,140,0.2);
+  }
+
+  /* TERMINAL */
+  .terminal {
+    background: #090a0b; border: 1px solid var(--border-2); margin-top: 2.5rem;
+  }
+  .terminal-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-3);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #e84040; }
+  .dot-y { background: var(--amber); }
+  .dot-g { background: var(--green); }
+  .terminal-title {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--text-3);
+    margin: 0 auto; letter-spacing: 0.05em;
+  }
+  .terminal-body {
+    padding: 1.5rem; font-family: var(--mono); font-size: 0.82rem;
+    line-height: 2; color: var(--text-2); min-height: 280px;
+  }
+  .t-prompt { color: var(--amber); }
+  .t-cmd    { color: var(--green); }
+  .t-hdr    { color: var(--amber); }
+  .t-sel    { color: var(--cyan); }
+  .t-dim    { color: var(--text-3); }
+  .t-active { color: var(--amber); }
+  .t-menu   { color: var(--text); padding-left: 1rem; }
+  .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--amber); vertical-align: middle; animation: blink 1s step-end infinite; }
+
+  /* FORMATS */
+  .formats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 2.5rem; }
+  .format-group { background: var(--bg-2); padding: 1.5rem; }
+  .format-group-title { font-family: var(--mono); font-size: 0.65rem; color: var(--text-3); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .format-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .format-pill { font-family: var(--mono); font-size: 0.72rem; padding: 0.2rem 0.6rem; background: var(--surface); border: 1px solid var(--border-2); color: var(--text-2); transition: all 0.2s; cursor: default; }
+  .format-pill:hover { border-color: var(--amber-dim); color: var(--amber); }
+
+  /* INSTALL */
+  .install-section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .install-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+  .install-card { background: var(--bg); border: 1px solid var(--border); padding: 1.5rem; }
+  .install-card-title { font-family: var(--mono); font-size: 0.8rem; color: var(--text-2); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; letter-spacing: 0.08em; }
+
+  .install-block {
+    background: #090a0b; border: 1px solid var(--border);
+    padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.82rem;
+    color: var(--green); margin-bottom: 0.5rem;
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    white-space: pre-wrap; line-height: 1.8;
+  }
+  .install-block .prefix { color: var(--text-3); flex-shrink: 0; }
+  .install-note { font-size: 0.78rem; color: var(--text-3); margin-top: 0.75rem; }
+
+  .extras-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .extra-pill { font-family: var(--mono); font-size: 0.7rem; padding: 0.3rem 0.75rem; background: var(--bg-3); border: 1px solid var(--border-2); color: var(--amber-dim); }
+  .extra-pill strong { color: var(--amber); }
+
+  /* CTA */
+  .cta-section { text-align: center; padding: 8rem 2rem; position: relative; overflow: hidden; }
+  .cta-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(245,166,35,0.06) 0%, transparent 70%); }
+  .cta-title { font-family: var(--display); font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem; position: relative; }
+  .cta-sub { color: var(--text-2); font-size: 1.05rem; font-weight: 300; margin-bottom: 2.5rem; position: relative; }
+  .cta-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; position: relative; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { font-family: var(--mono); font-size: 0.8rem; color: var(--amber); letter-spacing: 0.05em; }
+  .footer-links { display: flex; gap: 2rem; list-style: none; flex-wrap: wrap; }
+  .footer-links a { font-family: var(--mono); font-size: 0.7rem; color: var(--text-3); text-decoration: none; letter-spacing: 0.08em; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--amber); }
+  .footer-copy { font-family: var(--mono); font-size: 0.68rem; color: var(--text-3); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 0 1.25rem; }
+    .nav-links { display: none; }
+    .hero { padding: 5rem 1.25rem 6rem; }
+    .timecode, .corner { display: none; }
+    .stats-bar { position: static; flex-wrap: wrap; border-top: 1px solid var(--border); }
+    .stat-item { flex: 1; min-width: 100px; padding: 0.75rem 1rem; }
+    .why-grid, .ai-grid, .features-header { grid-template-columns: 1fr; gap: 2rem; }
+    .ops-tabs { flex-wrap: wrap; }
+    .ops-tab { font-size: 0.65rem; padding: 0.6rem 0.9rem; }
+    .ops-table th, .ops-table td { padding: 0.6rem 0.75rem; font-size: 0.8rem; }
+    section { padding: 4rem 1.25rem; }
+    footer { flex-direction: column; text-align: center; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-2); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--amber-dim); }
+  ::selection { background: rgba(245,166,35,0.3); color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span class="blink"></span><span>peg_this</span></div>
+  <ul class="nav-links">
+    <li><a href="#why">Why</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#ai">AI</a></li>
+    <li><a href="#cli">CLI</a></li>
+    <li><a href="#install">Install</a></li>
+  </ul>
+  <a href="https://github.com/hariharen9/ffmpeg-this" target="_blank" class="nav-cta">GitHub ↗</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div style="position:absolute;inset:0;overflow:hidden;">
+    <div class="hero-grid"></div>
+    <div class="waveform" id="waveform"></div>
+  </div>
+
+  <div class="timecode">REC ● <span id="tc">00:00:00:00</span></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <p class="hero-eyebrow">● NOW BROADCASTING — v5.1.0</p>
+
+  <h1 class="hero-title">FFm<span class="accent">PEG</span><span class="dim">-this</span></h1>
+
+  <p class="hero-sub">
+    Professional video editing, AI tools, and downloads — all in an interactive CLI menu. No flags to memorize. No StackOverflow required.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#install" class="btn-primary">▶ Get Started</a>
+    <a href="https://github.com/hariharen9/ffmpeg-this" target="_blank" class="btn-secondary">★ Star on GitHub</a>
+  </div>
+
+  <div class="install-cmd">
+    <code><span class="prompt">$ </span>pip install peg_this</code>
+    <button class="copy-btn" onclick="copyInstall(this)">COPY</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-value">100+</span><span class="stat-label">Operations</span></div>
+    <div class="stat-item"><span class="stat-value">7</span><span class="stat-label">AI Models</span></div>
+    <div class="stat-item"><span class="stat-value">99+</span><span class="stat-label">Languages</span></div>
+    <div class="stat-item"><span class="stat-value">1000+</span><span class="stat-label">Download Sites</span></div>
+    <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">Platforms</span></div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why-section" id="why">
+  <div class="container">
+    <p class="section-label">The Problem</p>
+    <h2 class="section-title">FFmpeg is power.<br>The syntax is the wall.</h2>
+
+    <div class="why-grid reveal">
+      <div>
+        <div class="code-panel">
+          <span class="code-panel-label bad">WITHOUT peg_this</span>
+          <div class="code-block">
+<span class="c-cmt"># Crop to 9:16 portrait</span>
+<span class="c-cmd">ffmpeg</span> <span class="c-flag">-i</span> input.mp4 <span class="c-flag">-vf</span> <span class="c-str">"crop=iw*9/16:ih:(iw-iw*9/16)/2:0"</span>
+<span class="c-flag">-c:v</span> libx264 <span class="c-flag">-crf</span> 23 <span class="c-flag">-preset</span> medium <span class="c-flag">-c:a</span> aac output.mp4
+
+<span class="c-cmt"># Compress to 25MB for Discord</span>
+<span class="c-cmd">ffmpeg</span> <span class="c-flag">-i</span> input.mp4 <span class="c-flag">-c:v</span> libx264 <span class="c-flag">-b:v</span>
+<span class="c-err">$(( 25*8192/$(ffprobe -v error -show_entries format=duration</span>
+<span class="c-err">-of csv=p=0 input.mp4 | cut -d. -f1) ))k</span>
+<span class="c-flag">-pass</span> 1 <span class="c-flag">-f</span> null /dev/null <span class="c-err">&& ...</span>
+
+<span class="c-cmt"># Add subtitles... good luck</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-features">
+        <div class="why-feature">
+          <span class="why-feature-icon">⌨️</span>
+          <div>
+            <div class="why-feature-title">Just type <code style="font-family:var(--mono);color:var(--amber);font-size:0.85em">peg_this</code></div>
+            <div class="why-feature-desc">An interactive menu guides you through every operation. Pick from a list. Follow prompts. Done.</div>
+          </div>
+        </div>
+        <div class="why-feature">
+          <span class="why-feature-icon">🧠</span>
+          <div>
+            <div class="why-feature-title">AI-Powered, Locally Run</div>
+            <div class="why-feature-desc">Auto subtitles in 99 languages, smart reframe with face tracking, background removal, voice dubbing — all on your machine, no cloud.</div>
+          </div>
+        </div>
+        <div class="why-feature">
+          <span class="why-feature-icon">⚡</span>
+          <div>
+            <div class="why-feature-title">Lossless Where It Matters</div>
+            <div class="why-feature-desc">Trim and loop without re-encoding. Stream-copy for instant results. Re-encode only when you truly need it.</div>
+          </div>
+        </div>
+        <div class="why-feature">
+          <span class="why-feature-icon">🖥️</span>
+          <div>
+            <div class="why-feature-title">GUI Mode Available</div>
+            <div class="why-feature-desc">Hardware-accelerated desktop interface via DearPyGUI. Same full engine, entirely visual workflow.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="features-header reveal">
+      <div>
+        <p class="section-label">What It Does</p>
+        <h2 class="section-title">Every media operation<br>in one place.</h2>
+      </div>
+      <p class="section-desc">Video, audio, images, downloads, subtitles, AI upscaling — peg_this wraps FFmpeg's full power into a guided, memorable experience.</p>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">🎬</span>
+        <div class="feature-title">Video</div>
+        <div class="feature-desc">Convert, compress, trim, crop, split, join, rotate, speed change, reverse, stabilize, color grade, denoise, watermark, Picture-in-Picture, loop, fade, GIF.</div>
+        <div class="feature-tags">
+          <span class="tag tag-amber">Convert</span><span class="tag tag-amber">Compress</span>
+          <span class="tag">Trim</span><span class="tag">Crop</span>
+          <span class="tag">GIF</span><span class="tag">Stabilize</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <div class="feature-title">AI Tools</div>
+        <div class="feature-desc">Auto subtitles in 99 languages, brainrot captions, smart reframe with face tracking, background removal, video upscaling, stem separation, auto-dubbing in 24 languages.</div>
+        <div class="feature-tags">
+          <span class="tag tag-cyan">Subtitles</span><span class="tag tag-cyan">Upscale</span>
+          <span class="tag tag-cyan">Reframe</span><span class="tag tag-cyan">Dub</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">📥</span>
+        <div class="feature-title">Downloader</div>
+        <div class="feature-desc">YouTube, TikTok, Twitter and 1000+ sites via yt-dlp. Quality picker, audio extraction, playlist mode, SponsorBlock, speed limit, cookies, proxy support.</div>
+        <div class="feature-tags">
+          <span class="tag tag-green">yt-dlp</span><span class="tag">Playlists</span>
+          <span class="tag">SponsorBlock</span><span class="tag">4K</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🎵</span>
+        <div class="feature-title">Audio</div>
+        <div class="feature-desc">Extract, remove, merge, adjust volume with dB presets, fade with 6 curve types, normalize via EBU R128/Peak/RMS, generate visualizers, convert formats.</div>
+        <div class="feature-tags">
+          <span class="tag">MP3</span><span class="tag">FLAC</span>
+          <span class="tag">WAV</span><span class="tag tag-cyan">Stems</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🖼️</span>
+        <div class="feature-title">Images</div>
+        <div class="feature-desc">Resize, rotate, flip, crop interactively, adjust colors with 8 presets, blur/sharpen, apply effects, add borders and text, compress, convert, remove background.</div>
+        <div class="feature-tags">
+          <span class="tag">Resize</span><span class="tag">Crop</span>
+          <span class="tag tag-cyan">BG Remove</span><span class="tag">Compress</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">📦</span>
+        <div class="feature-title">Batch &amp; Utilities</div>
+        <div class="feature-desc">Batch convert folders, create slideshows, edit metadata, inspect file properties, configure encoding presets, hardware acceleration via CUDA, Apple Silicon MPS, and CPU.</div>
+        <div class="feature-tags">
+          <span class="tag tag-amber">Batch</span><span class="tag">CUDA</span>
+          <span class="tag">MPS</span><span class="tag">Metadata</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI SPOTLIGHT -->
+<section class="ai-section" id="ai">
+  <div class="container">
+    <p class="section-label">AI Spotlight</p>
+    <h2 class="section-title reveal">Local AI. Zero cloud.<br>Runs on your machine.</h2>
+
+    <div class="ai-grid reveal">
+      <div class="ai-card">
+        <div class="ai-card-badge">AI</div>
+        <div class="ai-card-title">💬 Auto Subtitles</div>
+        <div class="ai-card-desc">Generate subtitles using Faster-Whisper with 7 model sizes from tiny to large-v3. Hard burn, soft embed, or export to SRT/VTT/LRC. Includes brainrot word-by-word animated captions.</div>
+        <div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Models</span><span class="ai-detail-val">tiny.en → large-v3 (75MB–3GB)</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Languages</span><span class="ai-detail-val">99+ via Whisper multilingual</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Output</span><span class="ai-detail-val">.srt · .vtt · .txt · .lrc · ASS burn</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Special</span><span class="ai-detail-val">Brainrot animated word captions</span></div>
+        </div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-badge">AI</div>
+        <div class="ai-card-title">📐 Smart Reframe</div>
+        <div class="ai-card-desc">Auto-crop 16:9 → 9:16 keeping subjects in frame. Haar cascade face detection with temporal EMA smoothing for cinematic pan. No GPU required.</div>
+        <div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Targets</span><span class="ai-detail-val">9:16 · 1:1 · 4:5</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Use Cases</span><span class="ai-detail-val">TikTok · Reels · Shorts · Instagram</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Method</span><span class="ai-detail-val">Haar cascade + EMA smoothing</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Hardware</span><span class="ai-detail-val">CPU only — no GPU needed</span></div>
+        </div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-badge">AI</div>
+        <div class="ai-card-title">🚀 Video Upscaling</div>
+        <div class="ai-card-desc">Real-ESRGAN powered upscaling with four modes — from instant FFmpeg to slow quality-AI and an anime-specific model. CUDA, Apple MPS, and CPU supported.</div>
+        <div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Quick</span><span class="ai-detail-val">⚡ FFmpeg — instant basic upscaling</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Fast AI</span><span class="ai-detail-val">🚀 Real-ESRGAN, general content</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Quality AI</span><span class="ai-detail-val">🐢 Slow, best for final renders</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Anime AI</span><span class="ai-detail-val">🚀 Optimized for animation</span></div>
+        </div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-badge">AI</div>
+        <div class="ai-card-title">🎙️ Auto-Dubbing</div>
+        <div class="ai-card-desc">Translate and re-voice videos into 24+ languages. Transcription, translation, and voice synthesis all run locally via Piper TTS. Music stem separation via Demucs.</div>
+        <div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Languages</span><span class="ai-detail-val">24+ including CJK, Arabic, Hindi</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Pipeline</span><span class="ai-detail-val">Whisper → translate → Piper TTS</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Privacy</span><span class="ai-detail-val">100% local — no cloud API calls</span></div>
+          <div class="ai-detail-row"><span class="ai-detail-key">Bonus</span><span class="ai-detail-val">Demucs stems: vocals/drums/bass/other</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLI DEMO -->
+<section id="cli">
+  <div class="container">
+    <p class="section-label">Interactive CLI</p>
+    <h2 class="section-title reveal">A menu-driven experience.<br>Zero memorization.</h2>
+
+    <div class="terminal reveal">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <div class="terminal-title">peg_this — bash</div>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">peg_this</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-hdr">  ██████╗ ███████╗ ██████╗     ████████╗██╗  ██╗██╗███████╗</span></div>
+        <div><span class="t-dim">  FFm</span><span class="t-hdr">PEG</span><span class="t-dim">-this  ·  v5.1.0  ·  FFmpeg wrapper &amp; AI toolkit</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-dim">  Select an operation:</span></div>
+        <div>&nbsp;</div>
+        <div class="t-active">  ▶  🎬  Video Operations</div>
+        <div class="t-menu">     🤖  AI Tools</div>
+        <div class="t-menu">     📥  Download</div>
+        <div class="t-menu">     🎵  Audio</div>
+        <div class="t-menu">     🖼️  Images</div>
+        <div class="t-menu">     📦  Batch &amp; Utilities</div>
+        <div class="t-menu">     ⚙️  Settings &amp; Config</div>
+        <div class="t-menu">     ❓  Help</div>
+        <div>&nbsp;</div>
+        <div><span class="t-dim">  [↑↓] Navigate  [Enter] Select  [Q] Quit</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-dim">&nbsp;&nbsp;</span><span class="t-cursor"></span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-top:none;" class="reveal">
+      <div style="background:var(--bg-2);padding:1.25rem 1.5rem;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:var(--amber);letter-spacing:0.1em;margin-bottom:0.75rem;">INTERACTIVE</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--green);margin-bottom:0.25rem;">peg_this</div>
+        <div style="font-size:0.78rem;color:var(--text-3);margin-bottom:0.75rem;">Full interactive menu</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--green);margin-bottom:0.25rem;">peg_this --gui</div>
+        <div style="font-size:0.78rem;color:var(--text-3);">Desktop GUI (beta)</div>
+      </div>
+      <div style="background:var(--bg-2);padding:1.25rem 1.5rem;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:var(--amber);letter-spacing:0.1em;margin-bottom:0.75rem;">DOWNLOAD SHORTCUTS</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--green);margin-bottom:0.25rem;">peg_this -d [url]</div>
+        <div style="font-size:0.78rem;color:var(--text-3);margin-bottom:0.75rem;">Download with quality picker</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--green);margin-bottom:0.25rem;">peg_this -dy [url]</div>
+        <div style="font-size:0.78rem;color:var(--text-3);">Instant best-quality MP4</div>
+      </div>
+      <div style="background:var(--bg-2);padding:1.25rem 1.5rem;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:var(--amber);letter-spacing:0.1em;margin-bottom:0.75rem;">PREREQUISITE</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--cyan);margin-bottom:0.25rem;">brew install ffmpeg</div>
+        <div style="font-size:0.78rem;color:var(--text-3);margin-bottom:0.75rem;">macOS (Homebrew)</div>
+        <div style="font-family:var(--mono);font-size:0.82rem;color:var(--cyan);margin-bottom:0.25rem;">choco install ffmpeg</div>
+        <div style="font-size:0.78rem;color:var(--text-3);">Windows (Chocolatey)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OPS TABLE -->
+<section class="ops-section">
+  <div class="container">
+    <p class="section-label">Full Reference</p>
+    <h2 class="section-title reveal">100+ operations.<br>Zero flags to remember.</h2>
+
+    <div class="ops-tabs reveal">
+      <button class="ops-tab active" onclick="switchTab('video',this)">🎬 Video</button>
+      <button class="ops-tab" onclick="switchTab('audio',this)">🎵 Audio</button>
+      <button class="ops-tab" onclick="switchTab('image',this)">🖼️ Image</button>
+      <button class="ops-tab" onclick="switchTab('subtitle',this)">💬 Subtitles</button>
+    </div>
+
+    <div class="ops-panel active" id="tab-video">
+      <table class="ops-table">
+        <thead><tr><th>Operation</th><th>Method</th><th>Re-encode?</th></tr></thead>
+        <tbody>
+          <tr><td>Convert (MP4, MKV, MOV, AVI, WebM)</td><td>FFmpeg transcode</td><td>Yes</td></tr>
+          <tr><td>Compress (target size or CRF)</td><td>2-pass encoding</td><td>Yes</td></tr>
+          <tr><td>Change Resolution (4K/1080p/720p/480p/custom)</td><td>Scale filter</td><td>Yes</td></tr>
+          <tr><td>Change FPS (24/30/60/120)</td><td>fps / minterpolate</td><td>Yes</td></tr>
+          <tr><td>Trim (lossless cut)</td><td>Stream copy</td><td><span class="lossless">No — lossless</span></td></tr>
+          <tr><td>Crop (visual interactive)</td><td>crop filter</td><td>Yes</td></tr>
+          <tr><td>Split (equal parts or by duration)</td><td>Stream copy or re-encode</td><td>Configurable</td></tr>
+          <tr><td>Join / Concatenate</td><td>Concat filter</td><td>Yes</td></tr>
+          <tr><td>Speed (0.25x – 4x)</td><td>setpts + atempo</td><td>Yes</td></tr>
+          <tr><td>Reverse</td><td>Reverse filter</td><td>Yes</td></tr>
+          <tr><td>Rotate (90°/180°) / Flip</td><td>transpose / hflip/vflip</td><td>Yes</td></tr>
+          <tr><td>Loop (N times or target duration)</td><td>stream_loop</td><td><span class="lossless">No — lossless</span></td></tr>
+          <tr><td>Color Correction</td><td>eq filter</td><td>Yes</td></tr>
+          <tr><td>Denoise (fast / quality)</td><td>hqdn3d / nlmeans</td><td>Yes</td></tr>
+          <tr><td>Stabilize</td><td>vidstab (two-pass)</td><td>Yes</td></tr>
+          <tr><td>Picture-in-Picture</td><td>overlay filter</td><td>Yes</td></tr>
+          <tr><td>Add Watermark (image or text)</td><td>overlay filter</td><td>Yes</td></tr>
+          <tr><td>Create GIF (2-pass palette)</td><td>palettegen + paletteuse</td><td>Yes</td></tr>
+          <tr><td>AI Smart Reframe</td><td>Haar face tracking + crop</td><td>Yes</td></tr>
+          <tr><td>AI Background Removal</td><td>rembg (U2-Net)</td><td>Yes</td></tr>
+          <tr><td>AI Brainrot Captions</td><td>Whisper + ASS</td><td>Yes</td></tr>
+          <tr><td>AI Video Upscaling</td><td>Real-ESRGAN</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ops-panel" id="tab-audio">
+      <table class="ops-table">
+        <thead><tr><th>Operation</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Extract from video</td><td>MP3, FLAC, WAV — stream copy where possible</td></tr>
+          <tr><td>Remove from video</td><td><span class="lossless">Stream copy — lossless</span></td></tr>
+          <tr><td>Merge with video</td><td>Replace or mix audio tracks</td></tr>
+          <tr><td>Adjust Volume</td><td>Presets, dB value, or multiplier</td></tr>
+          <tr><td>Fade In / Out</td><td>6 curve types available</td></tr>
+          <tr><td>Normalize</td><td>EBU R128 · Peak · RMS · Dynamic</td></tr>
+          <tr><td>Visualizer</td><td>Spectrum · Waveform · CQT render</td></tr>
+          <tr><td>Convert format</td><td>MP3 · FLAC · WAV</td></tr>
+          <tr><td>AI Stem Separation</td><td>Vocals · Drums · Bass · Other via Demucs (~1.5GB)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ops-panel" id="tab-image">
+      <table class="ops-table">
+        <thead><tr><th>Operation</th><th>Options</th></tr></thead>
+        <tbody>
+          <tr><td>Convert</td><td>JPG · PNG · WebP · BMP · TIFF</td></tr>
+          <tr><td>Resize</td><td>Custom dimensions, preserve aspect ratio</td></tr>
+          <tr><td>Rotate / Flip</td><td>90° CW/CCW · 180° · Horizontal · Vertical</td></tr>
+          <tr><td>Crop</td><td>Visual click-and-drag interactive selection</td></tr>
+          <tr><td>Adjust Colors</td><td>Brightness · Contrast · Saturation · Gamma (8 presets)</td></tr>
+          <tr><td>Blur / Sharpen</td><td>4 blur levels · 3 sharpen levels</td></tr>
+          <tr><td>Effects</td><td>Grayscale · Sepia · Invert</td></tr>
+          <tr><td>Add Border</td><td>Custom size · 7 colors + hex input</td></tr>
+          <tr><td>Add Text</td><td>7 positions · Font · Color · Shadow/Outline</td></tr>
+          <tr><td>Compress</td><td>Quality 40–90% · Auto format conversion</td></tr>
+          <tr><td>AI Background Removal</td><td>rembg U2-Net model</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ops-panel" id="tab-subtitle">
+      <table class="ops-table">
+        <thead><tr><th>Model</th><th>Size</th><th>Speed</th><th>Languages</th></tr></thead>
+        <tbody>
+          <tr><td>tiny.en</td><td>~75 MB</td><td>Fastest</td><td>English only</td></tr>
+          <tr><td>base.en</td><td>~150 MB</td><td>Fast</td><td>English only</td></tr>
+          <tr><td>small.en</td><td>~500 MB</td><td>Balanced</td><td>English only</td></tr>
+          <tr><td>medium.en</td><td>~1.5 GB</td><td>Slower</td><td>English only</td></tr>
+          <tr><td>small</td><td>~500 MB</td><td>Balanced</td><td>99+ languages</td></tr>
+          <tr><td>medium</td><td>~1.5 GB</td><td>Slower</td><td>99+ languages</td></tr>
+          <tr><td>large-v3</td><td>~3 GB</td><td>Slowest</td><td>99+ (best accuracy)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section>
+  <div class="container">
+    <p class="section-label">Supported Formats</p>
+    <h2 class="section-title reveal">Every format you'll ever encounter.</h2>
+
+    <div class="formats-grid reveal">
+      <div class="format-group">
+        <div class="format-group-title">Video Input</div>
+        <div class="format-list">
+          <span class="format-pill">.mp4</span><span class="format-pill">.mkv</span>
+          <span class="format-pill">.avi</span><span class="format-pill">.mov</span>
+          <span class="format-pill">.webm</span><span class="format-pill">.flv</span>
+          <span class="format-pill">.wmv</span><span class="format-pill">.gif</span>
+        </div>
+      </div>
+      <div class="format-group">
+        <div class="format-group-title">Video Output</div>
+        <div class="format-list">
+          <span class="format-pill">.mp4</span><span class="format-pill">.mkv</span>
+          <span class="format-pill">.mov</span><span class="format-pill">.avi</span>
+          <span class="format-pill">.webm</span><span class="format-pill">.gif</span>
+        </div>
+      </div>
+      <div class="format-group">
+        <div class="format-group-title">Audio</div>
+        <div class="format-list">
+          <span class="format-pill">.mp3</span><span class="format-pill">.flac</span>
+          <span class="format-pill">.wav</span><span class="format-pill">.ogg</span>
+          <span class="format-pill">.aac</span><span class="format-pill">.m4a</span>
+          <span class="format-pill">.opus</span>
+        </div>
+      </div>
+      <div class="format-group">
+        <div class="format-group-title">Image</div>
+        <div class="format-list">
+          <span class="format-pill">.jpg</span><span class="format-pill">.png</span>
+          <span class="format-pill">.webp</span><span class="format-pill">.bmp</span>
+          <span class="format-pill">.tiff</span>
+        </div>
+      </div>
+      <div class="format-group">
+        <div class="format-group-title">Subtitles</div>
+        <div class="format-list">
+          <span class="format-pill">.srt</span><span class="format-pill">.vtt</span>
+          <span class="format-pill">.txt</span><span class="format-pill">.lrc</span>
+          <span class="format-pill">.ass</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="install-section" id="install">
+  <div class="container">
+    <p class="section-label">Installation</p>
+    <h2 class="section-title reveal">Up and running in 10 seconds.</h2>
+
+    <div class="install-grid reveal">
+      <div class="install-card">
+        <div class="install-card-title">📦 PyPI (Recommended)</div>
+        <div class="install-block"><span class="prefix">$</span><span>pip install peg_this</span></div>
+        <div class="install-note">Requires Python 3.8+ and FFmpeg installed in PATH</div>
+        <div style="margin-top:1.25rem;">
+          <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text-3);letter-spacing:0.1em;margin-bottom:0.5rem;">OPTIONAL EXTRAS</div>
+          <div class="extras-grid">
+            <span class="extra-pill"><strong>[download]</strong> yt-dlp engine</span>
+            <span class="extra-pill"><strong>[demucs]</strong> stem separation</span>
+            <span class="extra-pill"><strong>[upscale]</strong> Real-ESRGAN</span>
+            <span class="extra-pill"><strong>[all-ai,download]</strong> everything</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="install-card">
+        <div class="install-card-title">🍺 macOS — FFmpeg</div>
+        <div class="install-block"><span class="prefix">$</span><span>brew install ffmpeg</span></div>
+        <div class="install-card-title" style="margin-top:1rem;">🪟 Windows — FFmpeg</div>
+        <div class="install-block"><span class="prefix">></span><span>choco install ffmpeg</span></div>
+        <div class="install-card-title" style="margin-top:1rem;">🐧 Linux — FFmpeg</div>
+        <div class="install-block"><span class="prefix">$</span><span>sudo apt install ffmpeg</span></div>
+      </div>
+
+      <div class="install-card">
+        <div class="install-card-title">⬇️ Pre-built Binaries</div>
+        <div style="font-size:0.88rem;color:var(--text-2);margin-bottom:1.25rem;font-weight:300;line-height:1.6;">No Python required. Download the latest binary for your platform from the Releases page — Windows, macOS, and Linux all covered.</div>
+        <a href="https://github.com/hariharen9/ffmpeg-this/releases/latest" target="_blank" class="btn-primary" style="font-size:0.75rem;padding:0.65rem 1.25rem;">↓ Download Binary</a>
+      </div>
+
+      <div class="install-card">
+        <div class="install-card-title">🔧 From Source</div>
+        <div class="install-block" style="flex-direction:column;align-items:flex-start;gap:0.15rem;line-height:2;">
+          <div><span style="color:var(--text-3);">$ </span>git clone github.com/hariharen9/ffmpeg-this</div>
+          <div><span style="color:var(--text-3);">$ </span>cd ffmpeg-this</div>
+          <div><span style="color:var(--text-3);">$ </span>pip install -r requirements.txt</div>
+          <div><span style="color:var(--text-3);">$ </span>python -m src.peg_this.peg_this</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <h2 class="cta-title reveal">Stop memorizing.<br><span style="color:var(--amber)">Start creating.</span></h2>
+  <p class="cta-sub reveal">The full power of FFmpeg, finally at your fingertips.</p>
+  <div class="cta-actions reveal">
+    <a href="https://github.com/hariharen9/ffmpeg-this" target="_blank" class="btn-primary">★ Star on GitHub</a>
+    <a href="https://pypi.org/project/peg-this/" target="_blank" class="btn-secondary">↗ View on PyPI</a>
+    <a href="https://github.com/sponsors/hariharen9" target="_blank" class="btn-secondary">♥ Sponsor</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">peg_this</div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/hariharen9/ffmpeg-this" target="_blank">GitHub</a></li>
+    <li><a href="https://pypi.org/project/peg-this/" target="_blank">PyPI</a></li>
+    <li><a href="https://github.com/hariharen9/ffmpeg-this/releases/latest" target="_blank">Releases</a></li>
+    <li><a href="https://github.com/hariharen9/ffmpeg-this/blob/master/CONTRIBUTING.md" target="_blank">Contributing</a></li>
+    <li><a href="https://github.com/sponsors/hariharen9" target="_blank">Sponsor</a></li>
+    <li><a href="https://hariharen.site" target="_blank">Author</a></li>
+  </ul>
+  <div class="footer-copy">MIT License · Made with ❤️ by <a href="https://hariharen.site" target="_blank" style="color:var(--amber);text-decoration:none;">Hariharen</a></div>
+</footer>
+
+<script>
+  // Waveform bars
+  const wf = document.getElementById('waveform');
+  for (let i = 0; i < 120; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'waveform-bar';
+    const h = 20 + Math.random() * 80;
+    bar.style.cssText = `--dur:${0.4+Math.random()*1.2}s;--delay:${Math.random()*2}s;height:${h}%;`;
+    wf.appendChild(bar);
+  }
+
+  // Live timecode
+  function updateTC() {
+    const n = new Date();
+    const pad = v => String(v).padStart(2,'0');
+    document.getElementById('tc').textContent =
+      `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}:${pad(Math.floor(n.getMilliseconds()/33))}`;
+  }
+  setInterval(updateTC, 33);
+
+  // Copy install command
+  function copyInstall(btn) {
+    navigator.clipboard.writeText('pip install peg_this').catch(() => {});
+    btn.textContent = 'COPIED!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'COPY'; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+  }
+
+  // Tabs
+  function switchTab(id, el) {
+    document.querySelectorAll('.ops-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.ops-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Active nav highlight
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+    navLinks.forEach(a => { a.style.color = a.getAttribute('href') === '#'+cur ? 'var(--amber)' : ''; });
+  }, { passive: true });
+</script>
+</body>
+</html>
