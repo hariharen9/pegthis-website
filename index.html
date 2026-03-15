@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>peg_this — FFmpeg, but you'll actually use it</title>
+<meta name="description" content="Professional video editing, AI tools, and downloads — all in an interactive CLI menu. No flags to memorize.">
+<meta property="og:title" content="peg_this — FFmpeg, but you'll actually use it">
+<meta property="og:description" content="Interactive CLI for FFmpeg. Video editing, AI tools, yt-dlp downloads, upscaling, subtitles, and more.">
+<meta property="og:image" content="https://raw.githubusercontent.com/hariharen9/ffmpeg-this/master/assets/banner.png">
+<meta property="og:url" content="https://github.com/hariharen9/ffmpeg-this">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -839,6 +845,12 @@ a:focus-visible, button:focus-visible {
     <a href="https://github.com/hariharen9/ffmpeg-this" target="_blank" class="btn-secondary" id="hero-star-btn">★ Star on GitHub</a>
   </div>
 
+  <!-- <div class="reveal" style="margin: 3.5rem auto 1rem; max-width: 760px; width: 100%; padding: 0 1rem; position: relative; z-index: 10;">
+    <div style="background: var(--bg-3); padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 20px 50px var(--shadow);">
+      <img src="https://raw.githubusercontent.com/hariharen9/ffmpeg-this/main/assets/peg.gif" alt="peg_this UI" style="width: 100%; border-radius: 4px; display: block;">
+    </div>
+  </div> -->
+
   <div class="install-cmd">
     <code><span class="prompt">$ </span>pip install peg_this</code>
     <button class="copy-btn" id="copy-btn" onclick="copyInstall(this)">COPY</button>
@@ -973,10 +985,11 @@ a:focus-visible, button:focus-visible {
       <div class="feature-card">
         <span class="feature-icon">🤖</span>
         <div class="feature-title">AI Tools</div>
-        <div class="feature-desc">Auto subtitles in 99 languages, brainrot captions, smart reframe with face tracking, background removal, upscaling, stem separation, auto-dubbing.</div>
+        <div class="feature-desc">Auto subtitles in 99 languages, brainrot captions, smart reframe with face tracking, auto face blur, background removal, upscaling, stem separation, auto-dubbing.</div>
         <div class="feature-tags">
           <span class="tag tag-cyan">Subtitles</span><span class="tag tag-cyan">Upscale</span>
-          <span class="tag tag-cyan">Reframe</span><span class="tag tag-cyan">Dub</span>
+          <span class="tag tag-cyan">Reframe</span><span class="tag tag-cyan">Face Blur</span>
+          <span class="tag tag-cyan">Dub</span>
         </div>
       </div>
 
@@ -1084,6 +1097,45 @@ a:focus-visible, button:focus-visible {
 </section>
 
 <!-- ═══════════════════════════════════════════
+     DOWNLOAD SPOTLIGHT
+═══════════════════════════════════════════ -->
+<section style="background: var(--bg); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 4rem; align-items: center;">
+      <div class="reveal-left">
+        <p class="section-label">Download Engine</p>
+        <h2 class="section-title">1000+ sites.<br>Zero friction.</h2>
+        <p class="section-desc" style="margin-bottom: 1.5rem;">Powered by yt-dlp, download from YouTube, TikTok, Twitter, and everywhere else. With smart defaults and powerful overrides.</p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+          <li style="display: flex; align-items: center; gap: 0.75rem;"><span style="color:var(--green)">✓</span> <span style="color:var(--text-2); font-size: 0.95rem;"><strong>Quality Picker:</strong> Choose exact resolution or audio format</span></li>
+          <li style="display: flex; align-items: center; gap: 0.75rem;"><span style="color:var(--green)">✓</span> <span style="color:var(--text-2); font-size: 0.95rem;"><strong>Playlists:</strong> Download all, specific items, or a range</span></li>
+          <li style="display: flex; align-items: center; gap: 0.75rem;"><span style="color:var(--green)">✓</span> <span style="color:var(--text-2); font-size: 0.95rem;"><strong>SponsorBlock:</strong> Automatically skip or remove sponsor segments</span></li>
+          <li style="display: flex; align-items: center; gap: 0.75rem;"><span style="color:var(--green)">✓</span> <span style="color:var(--text-2); font-size: 0.95rem;"><strong>Instant Flow:</strong> Download → Trim → Compress instantly</span></li>
+        </ul>
+      </div>
+      <div class="reveal-right">
+         <div class="code-panel" style="min-height: auto;">
+           <span class="code-panel-label" style="color:var(--cyan)">peg_this -d</span>
+           <div class="code-block" style="line-height: 2;">
+<span class="c-cmd">$</span> peg_this -d "https://youtu.be/..."
+
+<span class="c-cmt">  [Info] Rick Astley - Never Gonna Give You Up</span>
+<span class="c-cmt">  [Views] 1.4B • [Duration] 3:32</span>
+
+<span class="c-arrow">  ▶</span> <span class="c-key">Select Format</span>
+      <span class="c-opt">[1]</span> <span class="c-val">Video (MP4/MKV)</span>
+      <span class="c-opt">[2]</span> <span class="c-val">Audio Only (MP3/FLAC)</span>
+
+<span class="c-cmt">  Enter choice: </span><span class="c-key">1</span>
+<span class="c-arrow">  ✓</span> <span class="c-val">Downloading 1080p (45MB)...</span>
+           </div>
+         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
      ANIMATED TERMINAL
 ═══════════════════════════════════════════ -->
 <section id="cli">
@@ -1143,6 +1195,7 @@ a:focus-visible, button:focus-visible {
       <button class="ops-tab" onclick="switchTab('audio',this)">🎵 Audio</button>
       <button class="ops-tab" onclick="switchTab('image',this)">🖼️ Image</button>
       <button class="ops-tab" onclick="switchTab('subtitle',this)">💬 Subtitles</button>
+      <button class="ops-tab" onclick="switchTab('utils',this)">📦 Utilities</button>
     </div>
 
     <div class="ops-panel active" id="tab-video">
@@ -1166,8 +1219,14 @@ a:focus-visible, button:focus-visible {
           <tr><td>Stabilize</td><td>vidstab (two-pass)</td><td>Yes</td></tr>
           <tr><td>Picture-in-Picture</td><td>overlay filter</td><td>Yes</td></tr>
           <tr><td>Add Watermark (image or text)</td><td>overlay filter</td><td>Yes</td></tr>
+          <tr><td>Extract Frames</td><td>Frame extraction</td><td>N/A</td></tr>
+          <tr><td>Video Fade</td><td>Fade In/Out (black or white)</td><td>Yes</td></tr>
+          <tr><td>Blur Region</td><td>Visual interactive selection</td><td>Yes</td></tr>
+          <tr><td>Smooth Slow Motion</td><td>minterpolate + setpts</td><td>Yes</td></tr>
+          <tr><td>Audio Visualizer</td><td>Spectrum / Waveform render</td><td>Yes</td></tr>
           <tr><td>Create GIF (2-pass palette)</td><td>palettegen + paletteuse</td><td>Yes</td></tr>
           <tr><td>AI Smart Reframe</td><td>Haar face tracking + crop</td><td>Yes</td></tr>
+          <tr><td>AI Auto Blur Faces</td><td>Haar face detection + blur</td><td>Yes</td></tr>
           <tr><td>AI Background Removal</td><td>rembg (U2-Net)</td><td>Yes</td></tr>
           <tr><td>AI Brainrot Captions</td><td>Whisper + ASS</td><td>Yes</td></tr>
           <tr><td>AI Video Upscaling</td><td>Real-ESRGAN</td><td>Yes</td></tr>
@@ -1222,6 +1281,20 @@ a:focus-visible, button:focus-visible {
           <tr><td>small</td><td>~500 MB</td><td>Balanced</td><td>99+ languages</td></tr>
           <tr><td>medium</td><td>~1.5 GB</td><td>Slower</td><td>99+ languages</td></tr>
           <tr><td>large-v3</td><td>~3 GB</td><td>Slowest</td><td>99+ (best accuracy)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ops-panel" id="tab-utils">
+      <table class="ops-table">
+        <thead><tr><th>Operation</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Batch Convert</td><td>Convert all media files in a directory</td></tr>
+          <tr><td>Slideshow Creator</td><td>Create video from images with custom duration</td></tr>
+          <tr><td>Metadata Editor</td><td>View and edit Title, Artist, Album, etc.</td></tr>
+          <tr><td>File Inspector</td><td>Deep analysis of codecs, streams, bitrates via ffprobe</td></tr>
+          <tr><td>Hardware Acceleration</td><td>Auto-detect CUDA (NVIDIA) and MPS (Apple Silicon)</td></tr>
+          <tr><td>GUI Mode</td><td>Hardware-accelerated desktop interface (--gui)</td></tr>
         </tbody>
       </table>
     </div>
@@ -1356,7 +1429,7 @@ a:focus-visible, button:focus-visible {
     <li><a href="https://github.com/sponsors/hariharen9" target="_blank">Sponsor</a></li>
     <li><a href="https://hariharen.site" target="_blank">Author</a></li>
   </ul>
-  <div class="footer-copy">MIT License · Made with ❤️ by <a href="https://hariharen.site" target="_blank" style="color:var(--amber);text-decoration:none;">Hariharen</a></div>
+  <div class="footer-copy">MIT License · Crafted by <a href="https://hariharen.site" target="_blank" style="color:var(--amber);text-decoration:none;">Hariharen</a></div>
 </footer>
 
 <!-- ═══════════════════════════════════════════
