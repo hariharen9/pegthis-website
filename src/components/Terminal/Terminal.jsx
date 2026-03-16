@@ -261,11 +261,26 @@ function TerminalInstance({ sequence, started, replayKey, onDone }) {
 }
 
 // ── Main Shell ──────────────────────────────────────────────────────────
-export default function Terminal() {
+export default function Terminal({ version }) {
   const wrapRef = useRef(null)
   const [started, setStarted] = useState(false)
   const [doneCount, setDoneCount] = useState(0)
   const [replayKey, setReplayKey] = useState(0)
+
+  // Dynamically inject the version into the sequences
+  const dynamicSeqLeft = SEQ_LEFT.map(step => {
+    if (step.html && step.html.includes('v5.1.0')) {
+      return { ...step, html: step.html.replace('v5.1.0', version) }
+    }
+    return step
+  })
+
+  const dynamicSeqRight = SEQ_RIGHT.map(step => {
+    if (step.html && step.html.includes('v5.1.0')) {
+      return { ...step, html: step.html.replace('v5.1.0', version) }
+    }
+    return step
+  })
 
   useEffect(() => {
     const el = wrapRef.current
@@ -303,13 +318,13 @@ export default function Terminal() {
 
           <div className={styles.terminalBody}>
             <TerminalInstance
-              sequence={SEQ_LEFT}
+              sequence={dynamicSeqLeft}
               started={started}
               replayKey={replayKey}
               onDone={() => setDoneCount(c => c + 1)}
             />
             <TerminalInstance
-              sequence={SEQ_RIGHT}
+              sequence={dynamicSeqRight}
               started={started}
               replayKey={replayKey}
               onDone={() => setDoneCount(c => c + 1)}

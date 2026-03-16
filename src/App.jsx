@@ -17,6 +17,7 @@ import Footer from './components/Footer/Footer'
 
 export default function App() {
   const [starCount, setStarCount] = useState(null)
+  const [version, setVersion] = useState('v5.1.0') // Default fallback
 
   // ── Lenis smooth scroll ────────────────────────────────────────────────────
   useEffect(() => {
@@ -27,8 +28,9 @@ export default function App() {
     return () => { lenis.destroy(); cancelAnimationFrame(rafId) }
   }, [])
 
-  // ── Fetch GitHub stars ─────────────────────────────────────────────────────
+  // ── Fetch GitHub stars and latest version ────────────────────────────────────
   useEffect(() => {
+    // Fetch stars
     fetch('https://api.github.com/repos/hariharen9/ffmpeg-this', {
       headers: { Accept: 'application/vnd.github.v3+json' },
     })
@@ -38,6 +40,18 @@ export default function App() {
         const n = d.stargazers_count
         if (typeof n === 'number') {
           setStarCount(n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n))
+        }
+      })
+      .catch(() => {})
+
+    // Fetch latest release version
+    fetch('https://api.github.com/repos/hariharen9/ffmpeg-this/releases/latest', {
+      headers: { Accept: 'application/vnd.github.v3+json' },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.tag_name) {
+          setVersion(d.tag_name)
         }
       })
       .catch(() => {})
@@ -70,12 +84,12 @@ export default function App() {
     <>
       <MouseSpotlight />
       <Nav starCount={starCount} />
-      <Hero />
+      <Hero version={version} />
       <WhySection />
       <Features />
       <DownloadSpotlight />
       <AiSection />
-      <Terminal />
+      <Terminal version={version} />
       <OpsSection />
       <Formats />
       <Install />

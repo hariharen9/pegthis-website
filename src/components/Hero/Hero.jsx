@@ -33,7 +33,7 @@ function Waveform() {
   )
 }
 
-export default function Hero() {
+export default function Hero({ version }) {
   const [timecode, setTimecode] = useState('00:00:00:00')
   const [copied, setCopied] = useState(false)
 
@@ -68,10 +68,10 @@ export default function Hero() {
 
       <p
         className={styles.eyebrow}
-        onMouseEnter={() => document.getElementById('eyebrow-text').innerText = '● NOW BROADCASTING — v5.1.0'}
-        onMouseLeave={() => document.getElementById('eyebrow-text').innerText = '● BEND OVER, WE\'RE ENCODING — v5.1.0'}
+        onMouseEnter={() => document.getElementById('eyebrow-text').innerText = `● NOW BROADCASTING — ${version}`}
+        onMouseLeave={() => document.getElementById('eyebrow-text').innerText = `● BEND OVER, WE'RE ENCODING — ${version}`}
       >
-        <span id="eyebrow-text" style={{ transition: 'color 0.2s' }}>● BEND OVER, WE'RE ENCODING — v5.1.0</span>
+        <span id="eyebrow-text" style={{ transition: 'color 0.2s' }}>● BEND OVER, WE'RE ENCODING — {version}</span>
       </p>
 
       <h1 className={styles.title}>
