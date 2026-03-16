@@ -116,6 +116,38 @@
 :global([data-theme="light"]) .iconMoon { opacity: 0; }
 :global([data-theme="light"]) .iconSun  { opacity: 1; }
 
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+.hamburgerLine {
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px;
+}
+.hamburgerLineOpen1 {
+  transform: rotate(45deg);
+}
+.hamburgerLineOpen2 {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.hamburgerLineOpen3 {
+  transform: rotate(-45deg);
+}
+
 @media (max-width: 768px) {
   .nav { padding: 0 1.25rem; }
   .navCenter { display: none; }

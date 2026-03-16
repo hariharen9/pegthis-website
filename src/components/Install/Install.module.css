@@ -1,5 +1,5 @@
 /* Install.module.css */
-.section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8rem 0; }
+.section { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8rem 2rem; }
 
 .sectionLabel {
   font-family: var(--mono); font-size: 0.65rem; color: var(--amber);
@@ -156,6 +156,7 @@
 }
 
 @media (max-width: 768px) {
+  .section { padding: 4rem 1.25rem; }
   .cmdLine { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem; }
   .commandText { white-space: pre-wrap; word-break: break-all; }
   .binaryNote { flex-direction: column; text-align: left; padding: 1.5rem; }

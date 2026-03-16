@@ -12,6 +12,7 @@ const NAV_LINKS = [
 export default function Nav({ starCount }) {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Theme toggle — reads/writes to <html data-theme>
   const toggleTheme = useCallback(() => {
@@ -43,12 +44,13 @@ export default function Nav({ starCount }) {
         <span>PEG-this</span>
       </a>
 
-      <ul className={styles.navCenter}>
+      <ul className={`${styles.navCenter} ${mobileMenuOpen ? styles.navCenterOpen : ''}`}>
         {NAV_LINKS.map(({ href, label }) => (
           <li key={href}>
             <a
               href={href}
               className={activeSection === href.slice(1) ? styles.active : ''}
+              onClick={() => setMobileMenuOpen(false)}
             >
               {label}
             </a>
@@ -72,6 +74,16 @@ export default function Nav({ starCount }) {
             <span className={`${styles.toggleIcon} ${styles.iconMoon}`}>🌙</span>
             <span className={`${styles.toggleIcon} ${styles.iconSun}`}>☀️</span>
           </div>
+        </button>
+
+        <button
+          className={styles.hamburger}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <div className={`${styles.hamburgerLine} ${mobileMenuOpen ? styles.hamburgerLineOpen1 : ''}`} />
+          <div className={`${styles.hamburgerLine} ${mobileMenuOpen ? styles.hamburgerLineOpen2 : ''}`} />
+          <div className={`${styles.hamburgerLine} ${mobileMenuOpen ? styles.hamburgerLineOpen3 : ''}`} />
         </button>
 
         <a href="https://github.com/hariharen9/ffmpeg-this" target="_blank" rel="noreferrer" className={styles.navCta}>
